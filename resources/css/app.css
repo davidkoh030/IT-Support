@@ -1,3 +1,10 @@
+/* Self-hosted Figtree (weights 400/500/600, matching the Breeze default) -
+   bundled by Vite instead of fetched from fonts.bunny.net at runtime, so the
+   app has no external font dependency. */
+@import '@fontsource/figtree/400.css';
+@import '@fontsource/figtree/500.css';
+@import '@fontsource/figtree/600.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
