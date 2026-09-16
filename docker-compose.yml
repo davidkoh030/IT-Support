@@ -1,0 +1,89 @@
+# Local development stack. NOT executed in the session that produced this
+# repository (no Docker daemon was available in that container - see
+# TECH_STACK.md §4). Reviewed for correctness; not verified by a live
+# `docker compose up`. All ports are bound to localhost only.
+name: it-support
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php.Dockerfile
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: it_support
+      DB_USERNAME: it_support
+      DB_PASSWORD: it_support_dev_password
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php.Dockerfile
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: it_support
+      DB_USERNAME: it_support
+      DB_PASSWORD: it_support_dev_password
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: php artisan queue:work --tries=3
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php.Dockerfile
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: it_support
+      DB_USERNAME: it_support
+      DB_PASSWORD: it_support_dev_password
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: php artisan schedule:work
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: it_support
+      MYSQL_USER: it_support
+      MYSQL_PASSWORD: it_support_dev_password
+      MYSQL_ROOT_PASSWORD: root_dev_password
+    volumes:
+      - it_support_mysql_dev:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_dev_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+
+volumes:
+  it_support_mysql_dev:
+    name: it_support_mysql_dev
