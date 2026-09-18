@@ -9,7 +9,7 @@
         "php": "^8.3",
         "intervention/image": "^3.0",
         "laravel/framework": "^13.17",
-        "laravel/tinker": "*",
+        "laravel/tinker": "^3.0",
         "spatie/laravel-permission": "^6.0"
     },
     "require-dev": {
